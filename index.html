@@ -3,100 +3,145 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>존비 치료</title>
+<title>존비 치료 프로그램</title>
 
 <style>
 body{
   margin:0;
-  font-family:sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   background:#f6efe6;
   text-align:center;
 }
-.page{display:none;padding:20px;}
-.active{display:block;}
 
+/* 페이지 */
+.page{ display:none; padding:20px; }
+.active{ display:block; }
+
+/* 버튼 */
 button{
   padding:14px;
   border:none;
-  border-radius:10px;
+  border-radius:12px;
+  font-size:18px;
+  width:80%;
+  margin-top:20px;
   background:#2e7d32;
   color:#fff;
-  width:80%;
-  font-size:18px;
-  margin-top:20px;
 }
 
+button:disabled{
+  background:#aaa;
+}
+
+/* 포스터 */
+.poster{
+  width:100%;
+  max-width:420px;
+  border-radius:14px;
+  margin-bottom:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* ===== 색상 칩 ===== */
 .color-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:8px;
-  margin-top:12px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+  margin-top:14px;
 }
 
-.color-btn{
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  color:#fff;
-  font-size:12px;
+.color-chip{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 10px;
+  border-radius:20px;
+  background:#ffffffcc;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.dot{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  border:1px solid #333;
+}
+
+/* 슬롯 */
+.slots{
+  margin-top:16px;
 }
 
 .slot{
-  width:40px;height:40px;
+  width:40px;
+  height:40px;
   border-radius:50%;
   border:2px solid #aaa;
   display:inline-block;
   margin:6px;
+}
+
+.progress{
+  margin-top:8px;
+  font-weight:bold;
 }
 </style>
 </head>
 
 <body>
 
-<!-- start -->
+<!-- 시작 -->
 <div id="startPage" class="page active">
   <h2>🧟 존비 치료 프로그램</h2>
   <button id="startBtn">START</button>
 </div>
 
-<!-- game -->
+<!-- 게임 -->
 <div id="gamePage" class="page">
 
-  <img src="zombie.png" style="width:90%;max-width:400px"
+  <img src="zombie.png" class="poster"
        onerror="this.style.display='none'">
 
   <p id="question"></p>
 
   <div id="colors" class="color-grid"></div>
 
-  <div>
+  <div class="slots">
     <div class="slot"></div>
     <div class="slot"></div>
     <div class="slot"></div>
   </div>
 
   <button id="nextBtn" disabled>Next →</button>
+
+  <div id="progress" class="progress"></div>
 </div>
 
-<!-- end -->
+<!-- 엔딩 -->
 <div id="endPage" class="page">
-  <h2>🧑 치료 완료!</h2>
+  <h1 style="font-size:100px;">🧑</h1>
+  <h2>🎉 치료 완료</h2>
+  <p>좀비가 사람으로 돌아왔습니다!</p>
   <button onclick="location.reload()">다시하기</button>
 </div>
 
 
 <script>
+/* ===== 테스트용 2명 ===== */
 const MAX_STAGE = 2;
 
-const zombieData=[
-  "좀비 #1 행동 관찰",
-  "좀비 #2 행동 관찰"
+const zombieData = [
+  "좀비 #1 : 친구의 몸을 허락 없이 만짐",
+  "좀비 #2 : 온라인에서 개인정보 요구"
 ];
 
-const colors=[
-
+/* ===== 색상 목록 ===== */
+const colors = [
   {t:'성폭력', c:'#e53935'},
-  {t:'성착취', c:'#fdd835', f:'#000'},
+  {t:'성착취', c:'#fdd835'},
   {t:'속임(가스라이팅)', c:'#fb8c00'},
   {t:'디지털성폭력', c:'#43a047'},
   {t:'온라인 그루밍범죄', c:'#1e88e5'},
@@ -104,70 +149,95 @@ const colors=[
   {t:'경계침해(불편감)', c:'#1a237e'},
   {t:'고정관념(편견)', c:'#8e24aa'},
   {t:'방관', c:'#6d4c41'},
-  {t:'성희롱', c:'#8bc34a', f:'#000'},
-  {t:'외모평가', c:'#4fc3f7', f:'#000'},
+  {t:'성희롱', c:'#8bc34a'},
+  {t:'외모평가', c:'#4fc3f7'},
   {t:'2차가해', c:'#9e9e9e'},
   {t:'성적대상화', c:'#ec407a'}
-
 ];
 
+let current = 0;
+let selected = [];
 
-let current=0;
-let selected=[];
+const startBtn = document.getElementById('startBtn');
+const nextBtn = document.getElementById('nextBtn');
+const colorWrap = document.getElementById('colors');
+const slots = document.querySelectorAll('.slot');
+const progress = document.getElementById('progress');
 
-const startBtn=document.getElementById('startBtn');
-const nextBtn=document.getElementById('nextBtn');
-const colorWrap=document.getElementById('colors');
-const slots=document.querySelectorAll('.slot');
+startBtn.addEventListener('click', startGame);
+nextBtn.addEventListener('click', nextZombie);
 
-startBtn.addEventListener('click',startGame);
-nextBtn.addEventListener('click',nextZombie);
-
+/* 페이지 전환 */
 function show(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.page')
+    .forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
+/* 시작 */
 function startGame(){
   show('gamePage');
   load();
 }
 
+/* 문제 로드 */
 function load(){
   selected=[];
   nextBtn.disabled=true;
+  updateSlots();
 
-  document.getElementById('question').innerText=zombieData[current];
+  document.getElementById('question').innerText =
+    zombieData[current];
 
+  progress.innerText = `${current+1} / ${MAX_STAGE}`;
+
+  renderColors();
+}
+
+/* 색상 칩 생성 */
+function renderColors(){
   colorWrap.innerHTML='';
 
   colors.forEach(c=>{
-    const b=document.createElement('button');
-    b.className='color-btn';
-    b.style.background=c.c;
-    b.style.color=c.f||'#fff';
-    b.innerText=c.t;
-    b.onclick=()=>select(c.c);
-    colorWrap.appendChild(b);
-  });
+    const chip=document.createElement('div');
+    chip.className='color-chip';
 
-  update();
+    const label=document.createElement('span');
+    label.innerText='#'+c.t;
+
+    const dot=document.createElement('div');
+    dot.className='dot';
+    dot.style.background=c.c;
+
+    chip.appendChild(label);
+    chip.appendChild(dot);
+
+    chip.onclick=()=>select(c.c);
+
+    colorWrap.appendChild(chip);
+  });
 }
 
+/* 색 선택 */
 function select(color){
-  if(selected.length>=3)return;
-  selected.push(color);
-  update();
+  if(selected.length>=3) return;
 
-  if(selected.length===3) nextBtn.disabled=false;
+  selected.push(color);
+  updateSlots();
+
+  if(selected.length===3){
+    nextBtn.disabled=false;
+  }
 }
 
-function update(){
+/* 슬롯 채우기 */
+function updateSlots(){
   slots.forEach((s,i)=>{
-    s.style.background=selected[i]||'#fff';
+    s.style.background = selected[i] || '#fff';
   });
 }
 
+/* 다음 */
 function nextZombie(){
   current++;
   if(current>=MAX_STAGE) show('endPage');
@@ -177,4 +247,3 @@ function nextZombie(){
 
 </body>
 </html>
-
