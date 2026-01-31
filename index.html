@@ -2,141 +2,61 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>존비 치료 프로젝트</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>존비 치료</title>
 
 <style>
 body{
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  font-family:sans-serif;
   background:#f6efe6;
   text-align:center;
 }
+.page{display:none;padding:20px;}
+.active{display:block;}
 
-.page{ display:none; padding:18px; }
-.active{ display:block; }
-
-/* 시작 */
-.zombie{ font-size:110px; margin-top:60px; }
-
-.start-btn, .next-btn{
-  background:#2e7d32;
-  color:white;
-  padding:14px 22px;
-  border-radius:12px;
+button{
+  padding:14px;
   border:none;
-  font-size:18px;
+  border-radius:10px;
+  background:#2e7d32;
+  color:#fff;
   width:80%;
-  margin-top:18px;
+  font-size:18px;
+  margin-top:20px;
 }
 
-.next-btn:disabled{
-  background:#aaa;
-}
-
-/* 포스터 */
-.poster{
-  width:100%;
-  max-width:420px;
-  border-radius:14px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.15);
-}
-
-/* 색 버튼 */
 .color-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  gap:10px;
-  margin-top:16px;
+  gap:8px;
+  margin-top:12px;
 }
 
 .color-btn{
-  padding:10px 6px;
-  border-radius:10px;
+  padding:10px;
   border:none;
+  border-radius:8px;
   color:#fff;
   font-size:12px;
-  font-weight:600;
-  min-height:55px;
-}
-
-/* 슬롯 */
-.slots{
-  display:flex;
-  justify-content:center;
-  gap:16px;
-  margin-top:18px;
 }
 
 .slot{
-  width:40px;
-  height:40px;
+  width:40px;height:40px;
   border-radius:50%;
-  background:#fff;
   border:2px solid #aaa;
-}
-
-.progress{
-  margin-top:12px;
-  font-weight:bold;
+  display:inline-block;
+  margin:6px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- 시작 -->
+<!-- start -->
 <div id="startPage" class="page active">
-  <div class="zombie">🧟</div>
-  <h2>존비 치료 프로그램</h2>
-  <button class="start-btn" onclick="startGame()">START</button>
+  <h2>🧟 존비 치료 프로그램</h2>
+  <button id="startBtn">START</button>
 </div>
 
-<!-- 게임 -->
-<div id="gamePage" class="page">
-
-  <img src="zombie.png" class="poster" />
-
-  <p id="question"></p>
-
-  <div class="color-grid" id="colors"></div>
-
-  <div class="slots">
-    <div class="slot"></div>
-    <div class="slot"></div>
-    <div class="slot"></div>
-  </div>
-
-  <!-- 🔥 Next 버튼 추가 -->
-  <button id="nextBtn" class="next-btn" disabled onclick="nextZombie()">
-    Next →
-  </button>
-
-  <div class="progress" id="progress"></div>
-</div>
-
-<!-- 엔딩 -->
-<div id="endPage" class="page">
-  <div style="font-size:120px;margin-top:40px;">🧑</div>
-  <h2>🎉 치료 완료</h2>
-  <p>좀비가 사람으로 돌아왔습니다!</p>
-  <button class="start-btn" onclick="location.reload()">다시하기</button>
-</div>
-
-
-<script>
-/* 🔥 테스트용 → 2개만 */
-const MAX_STAGE = 2;
-
-const zombieData = [
-  "좀비 #1 : 친구의 몸을 허락없이 만짐",
-  "좀비 #2 : 온라인에서 개인정보 요구"
-];
-
-/* 색상 목록 */
-const colors = [
-  {text:'성폭력',color:'#e53935'},
-  {text:'성착취',color:'#fdd835',font:'#000'},
-  {text:'속임(가스라이팅)',color:'#fb8c00'},
-  {text:'디지털성폭력',color:'#43a047'},
-  {text:'온라인그루밍',color:'#1e88e5'
+<!
