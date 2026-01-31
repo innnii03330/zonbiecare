@@ -59,4 +59,109 @@ button{
   <button id="startBtn">START</button>
 </div>
 
-<!
+<!-- game -->
+<div id="gamePage" class="page">
+
+  <img src="zombie.png" style="width:90%;max-width:400px"
+       onerror="this.style.display='none'">
+
+  <p id="question"></p>
+
+  <div id="colors" class="color-grid"></div>
+
+  <div>
+    <div class="slot"></div>
+    <div class="slot"></div>
+    <div class="slot"></div>
+  </div>
+
+  <button id="nextBtn" disabled>Next →</button>
+</div>
+
+<!-- end -->
+<div id="endPage" class="page">
+  <h2>🧑 치료 완료!</h2>
+  <button onclick="location.reload()">다시하기</button>
+</div>
+
+
+<script>
+const MAX_STAGE = 2;
+
+const zombieData=[
+  "좀비 #1 행동 관찰",
+  "좀비 #2 행동 관찰"
+];
+
+const colors=[
+  {t:'성폭력',c:'#e53935'},
+  {t:'성착취',c:'#fdd835',f:'#000'},
+  {t:'속임',c:'#fb8c00'},
+  {t:'디지털성폭력',c:'#43a047'}
+];
+
+let current=0;
+let selected=[];
+
+const startBtn=document.getElementById('startBtn');
+const nextBtn=document.getElementById('nextBtn');
+const colorWrap=document.getElementById('colors');
+const slots=document.querySelectorAll('.slot');
+
+startBtn.addEventListener('click',startGame);
+nextBtn.addEventListener('click',nextZombie);
+
+function show(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startGame(){
+  show('gamePage');
+  load();
+}
+
+function load(){
+  selected=[];
+  nextBtn.disabled=true;
+
+  document.getElementById('question').innerText=zombieData[current];
+
+  colorWrap.innerHTML='';
+
+  colors.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='color-btn';
+    b.style.background=c.c;
+    b.style.color=c.f||'#fff';
+    b.innerText=c.t;
+    b.onclick=()=>select(c.c);
+    colorWrap.appendChild(b);
+  });
+
+  update();
+}
+
+function select(color){
+  if(selected.length>=3)return;
+  selected.push(color);
+  update();
+
+  if(selected.length===3) nextBtn.disabled=false;
+}
+
+function update(){
+  slots.forEach((s,i)=>{
+    s.style.background=selected[i]||'#fff';
+  });
+}
+
+function nextZombie(){
+  current++;
+  if(current>=MAX_STAGE) show('endPage');
+  else load();
+}
+</script>
+
+</body>
+</html>
