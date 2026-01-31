@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>존비 치료 프로젝트</title>
+
+<style>
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  background:#f6efe6;
+  text-align:center;
+}
+
+.page{
+  display:none;
+  padding:24px;
+}
+
+.active{
+  display:block;
+}
+
+/* 버튼 */
+button{
+  border:none;
+  padding:14px 22px;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.start-btn{
+  background:#2e7d32;
+  color:white;
+  margin-top:40px;
+  width:70%;
+}
+
+/* 좀비 아이콘 */
+.zombie{
+  font-size:110px;
+  margin-top:60px;
+}
+
+/* 색 버튼 */
+.color-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin:20px 0;
+}
+
+.color-btn{
+  height:42px;
+  border-radius:10px;
+}
+
+/* 선택 슬롯 */
+.slots{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  margin-top:20px;
+}
+
+.slot{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:#fff;
+  border:2px solid #aaa;
+}
+
+/* 진행도 */
+.progress{
+  margin-top:10px;
+  font-weight:bold;
+}
+
+/* 엔딩 */
+.human{
+  font-size:110px;
+  margin-top:50px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 시작 페이지 -->
+<div id="startPage" class="page active">
+  <div class="zombie">🧟</div>
+  <h2>존비 치료 프로그램</h2>
+  <p>좀비의 말과 행동을 보고 색을 선택해 치료하세요</p>
+  <button class="start-btn" onclick="startGame()">START</button>
+</div>
+
+<!-- 게임 페이지 -->
+<div id="gamePage" class="page">
+
+  <h3 id="title">WANTED ZOMBIE</h3>
+  <div class="zombie">🧟‍♂️</div>
+
+  <p id="question"></p>
+
+  <div class="color-grid" id="colors"></div>
+
+  <div class="slots">
+    <div class="slot"></div>
+    <div class="slot"></div>
+    <div class="slot"></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+</div>
+
+<!-- 엔딩 -->
+<div id="endPage" class="page">
+  <div class="human">🧑</div>
+  <h2>치료 완료 🎉</h2>
+  <p>35명의 좀비가 모두 인간으로 돌아왔습니다!</p>
+  <button class="start-btn" onclick="location.reload()">다시하기</button>
+</div>
+
+<script>
+/* ===== 데이터 ===== */
+
+const zombieData = Array.from({length:35},(_,i)=>(
+  `좀비 #${i+1} : 친구의 몸을 허락없이 만졌다고 주장한다`
+));
+
+const colors = [
+  {name:'폭력',color:'#e53935'},
+  {name:'착취',color:'#fb8c00'},
+  {name:'속임',color:'#fdd835'},
+  {name:'디지털폭력',color:'#43a047'},
+  {name:'인간관계범죄',color:'#8e24aa'},
+  {name:'괴롭힘',color:'#3949ab'},
+  {name:'성희롱',color:'#1e88e5'},
+  {name:'정서학대',color:'#ec407a'}
+];
+
+/* ===== 상태 ===== */
+
+let current = 0;
+let selected = [];
+
+/* ===== 시작 ===== */
+
+function startGame(){
+  showPage('gamePage');
+  loadZombie();
+}
+
+/* ===== 페이지 전환 ===== */
+
+function showPage(id){
+  document.querySelectorAll('.page')
+    .forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ===== 좀비 로딩 ===== */
+
+function loadZombie(){
+  selected=[];
+  updateSlots();
+
+  document.getElementById('question').innerText =
+    zombieData[current];
+
+  document.getElementById('progress').innerText =
+    `${current+1} / 35`;
+
+  renderColors();
+}
+
+/* ===== 색 버튼 생성 ===== */
+
+function renderColors(){
+  const wrap=document.getElementById('colors');
+  wrap.innerHTML='';
+
+  colors.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='color-btn';
+    btn.style.background=c.color;
+    btn.onclick=()=>selectColor(c.color);
+    wrap.appendChild(btn);
+  });
+}
+
+/* ===== 색 선택 ===== */
+
+function selectColor(color){
+  if(selected.length>=3) return;
+
+  selected.push(color);
+  updateSlots();
+
+  if(selected.length===3){
+    setTimeout(nextZombie,500);
+  }
+}
+
+/* 슬롯 채우기 */
+function updateSlots(){
+  const slots=document.querySelectorAll('.slot');
+  slots.forEach((s,i)=>{
+    s.style.background = selected[i] || '#fff';
+  });
+}
+
+/* 다음 */
+function nextZombie(){
+  current++;
+
+  if(current>=35){
+    showPage('endPage');
+  }else{
+    loadZombie();
+  }
+}
+</script>
+
+</body>
+</html>
